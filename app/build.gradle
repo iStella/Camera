@@ -1,0 +1,70 @@
+apply plugin: 'com.android.application'
+
+android {
+	compileSdkVersion versionCompiler
+
+	defaultConfig {
+		minSdkVersion 21
+		targetSdkVersion versionTarget
+		versionCode 1
+		versionName "1.0"
+
+		applicationId "com.serenegiant.opencvwithuvc"
+		testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+		ndk {
+			abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
+		}
+	}
+	buildTypes {
+		release {
+			minifyEnabled false
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+		}
+		debug {
+			minifyEnabled false
+			debuggable false
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+		}
+	}
+	lintOptions {
+		checkReleaseBuilds false
+		abortOnError false
+	}
+	android.applicationVariants.all {
+		variant ->
+			variant.outputs.all {
+				// 此处指定生成的apk文件名
+				outputFileName = "camera.apk"
+			}
+	}
+}
+
+dependencies {
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+	androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+		exclude group: 'com.android.support', module: 'support-annotations'
+	})
+	implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+	testImplementation 'junit:junit:4.12'
+
+	implementation "com.android.support:support-annotations:${supportLibVersion}"
+	implementation("com.serenegiant:common:${commonLibVersion}") {
+		exclude module: 'support-v4'
+	}
+	implementation 'com.android.support:appcompat-v7:28.0.0'
+
+	implementation project(':opencv')
+	implementation project(':usbCameraCommon-release')
+	implementation project(':libuvccamera-release')
+}
+
+configurations.all {
+	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+		def requested = details.requested
+		if (requested.group == 'com.android.support') {
+			if (!requested.name.startsWith("multidex")) {
+				details.useVersion '28.0.0'
+			}
+		}
+	}
+}
